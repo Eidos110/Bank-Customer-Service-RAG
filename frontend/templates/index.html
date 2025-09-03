@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Banking Customer Service Assistant</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .chat-container {
+            padding: 30px;
+        }
+
+        .input-area {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+        }
+
+        #question {
+            flex: 1;
+            padding: 15px;
+            border: 2px solid #e1e8ed;
+            border-radius: 25px;
+            font-size: 16px;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+
+        #question:focus {
+            border-color: #4facfe;
+        }
+
+        #submit-btn {
+            padding: 15px 25px;
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        #submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(79, 172, 254, 0.4);
+        }
+
+        #submit-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .examples {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+        }
+
+        .examples h3 {
+            margin-bottom: 15px;
+            color: #333;
+        }
+
+        .example-questions {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 10px;
+        }
+
+        .example-btn {
+            background: white;
+            border: 1px solid #e1e8ed;
+            padding: 10px 15px;
+            border-radius: 20px;
+            cursor: pointer;
+            text-align: left;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+
+        .example-btn:hover {
+            border-color: #4facfe;
+            background: #f0f8ff;
+        }
+
+        .response-area {
+            margin-top: 30px;
+        }
+
+        .response {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .response h3 {
+            color: #4facfe;
+            margin-bottom: 10px;
+        }
+
+        .sources {
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid #e1e8ed;
+        }
+
+        .sources h4 {
+            color: #666;
+            margin-bottom: 10px;
+        }
+
+        .source-item {
+            background: white;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 5px;
+            border-left: 3px solid #4facfe;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #666;
+        }
+
+        .error {
+            background: #ffebee;
+            color: #c62828;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #4caf50;
+            margin-right: 8px;
+        }
+
+        .status-offline {
+            background: #f44336;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                margin: 10px;
+                border-radius: 10px;
+            }
+            
+            .header {
+                padding: 20px;
+            }
+            
+            .header h1 {
+                font-size: 2em;
+            }
+            
+            .chat-container {
+                padding: 20px;
+            }
+            
+            .input-area {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🏦 Banking Customer Service</h1>
+            <p>Ask me anything about banking services and I'll help you!</p>
+            <div id="system-status">
+                <span class="status-indicator" id="status-light"></span>
+                <span id="status-text">Checking system status...</span>
+            </div>
+        </div>
+        
+        <div class="chat-container">
+            <div class="examples">
+                <h3>Try asking:</h3>
+                <div class="example-questions">
+                    <button class="example-btn" onclick="askQuestion('What are your banking hours?')">
+                        What are your banking hours?
+                    </button>
+                    <button class="example-btn" onclick="askQuestion('How do I reset my online banking password?')">
+                        How do I reset my password?
+                    </button>
+                    <button class="example-btn" onclick="askQuestion('What should I do if my card is lost or stolen?')">
+                        Lost or stolen card?
+                    </button>
+                    <button class="example-btn" onclick="askQuestion('How long does it take to receive a new debit card?')">
+                        New debit card timeline?
+                    </button>
+                </div>
+            </div>
+            
+            <div class="input-area">
+                <input type="text" id="question" placeholder="Ask a banking question..." onkeypress="handleKeyPress(event)">
+                <button id="submit-btn" onclick="submitQuestion()">Ask</button>
+            </div>
+            
+            <div class="response-area" id="response-area"></div>
+        </div>
+    </div>
+
+    <script>
+        // Check system status on page load
+        window.onload = function() {
+            checkSystemStatus();
+        };
+
+        async function checkSystemStatus() {
+            try {
+                const response = await fetch('/api/system-info');
+                const data = await response.json();
+                
+                const statusLight = document.getElementById('status-light');
+                const statusText = document.getElementById('status-text');
+                
+                if (data.status === 'Ready') {
+                    statusLight.className = 'status-indicator';
+                    statusText.textContent = `System Ready - ${data.model}`;
+                } else {
+                    statusLight.className = 'status-indicator status-offline';
+                    statusText.textContent = 'System Offline';
+                }
+            } catch (error) {
+                console.error('Error checking system status:', error);
+                document.getElementById('status-light').className = 'status-indicator status-offline';
+                document.getElementById('status-text').textContent = 'System Status Unknown';
+            }
+        }
+
+        function handleKeyPress(event) {
+            if (event.key === 'Enter') {
+                submitQuestion();
+            }
+        }
+
+        async function submitQuestion() {
+            const questionInput = document.getElementById('question');
+            const question = questionInput.value.trim();
+            const submitBtn = document.getElementById('submit-btn');
+            const responseArea = document.getElementById('response-area');
+            
+            if (!question) {
+                return;
+            }
+            
+            // Disable button and show loading
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Thinking...';
+            responseArea.innerHTML = '<div class="loading">Processing your question...</div>';
+            
+            try {
+                const response = await fetch('/api/query', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ question: question })
+                });
+                
+                const data = await response.json();
+                
+                if (data.error) {
+                    responseArea.innerHTML = `<div class="error">Error: ${data.error}</div>`;
+                } else {
+                    displayResponse(data, question);
+                }
+            } catch (error) {
+                responseArea.innerHTML = `<div class="error">Network error: ${error.message}</div>`;
+            } finally {
+                // Re-enable button
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Ask';
+                questionInput.value = '';
+            }
+        }
+
+        function displayResponse(data, question) {
+            const responseArea = document.getElementById('response-area');
+            
+            let html = `
+                <div class="response">
+                    <h3>Question: ${question}</h3>
+                    <p><strong>Answer:</strong> ${data.answer}</p>
+            `;
+            
+            if (data.sources && data.sources.length > 0) {
+                html += `
+                    <div class="sources">
+                        <h4>Related Information:</h4>
+                        ${data.sources.map(source => `
+                            <div class="source-item">${source}</div>
+                        `).join('')}
+                    </div>
+                `;
+            }
+            
+            html += '</div>';
+            responseArea.innerHTML = html;
+        }
+
+        function askQuestion(question) {
+            document.getElementById('question').value = question;
+            submitQuestion();
+        }
+    </script>
+</body>
+</html>

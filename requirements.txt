@@ -1,0 +1,10 @@
+langchain==0.1.16
+langchain-community==0.0.34
+transformers==4.38.0
+torch==2.1.0
+sentence-transformers==2.2.2
+chromadb==0.4.24
+flask==3.0.2
+pandas==2.2.1
+numpy==1.24.3
+accelerate==0.25.0
